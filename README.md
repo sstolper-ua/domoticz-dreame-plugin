@@ -1,7 +1,8 @@
 
-# Xiaomi Mi Robot Vacuum - Domoticz Python plugin
+# Dream Robot Vacuum - Domoticz Python plugin
 
 *This plugin uses the [Python-miio](https://github.com/rytilahti/python-miio) library.*
+*This plugin is fork of the [mrin/domoticz-mirobot-plugin](https://github.com/mrin/domoticz-mirobot-plugin) linrary
 
 *See this [link](https://www.domoticz.com/wiki/Using_Python_plugins) for more information on the Domoticz plugins.*
 
@@ -45,14 +46,14 @@ Also need to install virtualenv:
 Then go to plugins folder and clone repository:
 ```
 cd domoticz/plugins
-git clone https://github.com/mrin/domoticz-mirobot-plugin.git xiaomi-mirobot
-cd xiaomi-mirobot
+git clone https://github.com/mrin/domoticz-dreame-plugin.git dreame-mirobot
+cd dreane-mirobot
 virtualenv -p python3 .env
 source .env/bin/activate
 
 # and then:
 pip3 install -r pip_req.txt 
-# or pip3 install gevent msgpack-python python-miio==0.3.1
+# or pip3 install gevent msgpack-python python-miio==0.6.0
 ```
 
 Since ```0.1.2``` need some prepare of **MIIO Server** to run as service:
@@ -60,13 +61,13 @@ Since ```0.1.2``` need some prepare of **MIIO Server** to run as service:
 ```
 nano miio_server.sh
 
-# 1. Check and update absolute path to miio_server.py
+# 1. Check and update absolute path to dreame_server.py
 # 2. Update IP and TOKEN for robot
 # 3. Optional. Change MIIO server host-port bindings if need it
 
 # file miio_server.sh
 DAEMON_USER=root
-DAEMON=/home/pi/domoticz/plugins/xiaomi-mirobot/miio_server.py
+DAEMON=/home/pi/domoticz/plugins/dreane-mirobot/dreame_server.py
 DAEMON_ARGS="192.168.1.12 476e6b70343055483230644c53707a12"
 DAEMON_ARGS="$DAEMON_ARGS --host 127.0.0.1 --port 22222"
 #
@@ -80,33 +81,33 @@ If your path different than default, update miio_server.py first line with your 
 
 3. For run as system service:
 ```
-sudo chmod +x miio_server.py
-sudo chmod +x miio_server.sh
+sudo chmod +x dreame_server.py
+sudo chmod +x dreame_server.sh
 
 # check your path here:
-sudo ln -s /home/pi/domoticz/plugins/xiaomi-mirobot/miio_server.sh /etc/init.d/miio_server
+sudo ln -s /home/pi/domoticz/plugins/dreame-mirobot/dreame_server.sh /etc/init.d/dreame_server
 
 # add to startup
-sudo update-rc.d miio_server defaults
+sudo update-rc.d dreame_server defaults
 sudo systemctl daemon-reload
 
 # if you want to remove from startup
-sudo update-rc.d -f miio_server remove
+sudo update-rc.d -f dreame_server remove
 ```
 
 4. Run server and test script:
 ```
-sudo service miio_server start
+sudo service dreame_server start
 sudo chmod +x test.py
 sudo ./test.py
 
-# to stop miio server service
-sudo service miio_server stop
+# to stop dreane server service
+sudo service dreame_server stop
 ```
 
 Also you can run MIIO Server manually and look log output:
 ```
-sudo ./miio_server.py 192.168.1.12 476e6b70343055483230644c53707a12 --host 127.0.0.1 --port 22222
+sudo ./dreame_server.py 192.168.1.12 476e6b70343055483230644c53707a12 --host 127.0.0.1 --port 22222
 
 # then you can run test
 sudo ./test.py
@@ -117,7 +118,7 @@ If server and test is ok, time to restart the Domoticz:
 sudo service domoticz.sh restart
 ```
 
-Now go to **Setup** -> **Hardware** in your Domoticz interface and add type with name **Xiaomi Mi Robot Vacuum**.
+Now go to **Setup** -> **Hardware** in your Domoticz interface and add type with name **Dreame Robot Vacuum**.
 
 | Field | Information|
 | ----- | ---------- |
@@ -134,7 +135,7 @@ If you want to change ```Fan Level Type``` just disable hardware, update type an
 ## How to update plugin
 
 ```
-cd domoticz/plugins/xiaomi-mirobot
+cd domoticz/plugins/dreame-mirobot
 git pull
 ```
 
@@ -159,4 +160,5 @@ sudo service domoticz.sh restart
 
 ### How to obtain device Token
 
+Check the [instruction](https://github.com/PiotrMachowski/Xiaomi-cloud-tokens-extractor)
 Check the [instruction](https://github.com/rytilahti/python-miio#finding-the-token)
