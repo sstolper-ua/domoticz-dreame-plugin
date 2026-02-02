@@ -14,7 +14,8 @@ from gevent.queue import Queue
 from gevent.pool import Group
 from gevent.server import StreamServer
 import argparse
-from miio import Vacuum, DeviceException
+from miio import DreameVacuum, DeviceException
+#import miio
 from msgpack import Unpacker
 import time
 import signal
@@ -22,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 import logging
 
 parser = argparse.ArgumentParser()
-parser.add_argument('ip', type=str, help='vacuum ip address', default='192.168.1.12"')
+parser.add_argument('ip', type=str, help='DreameVacuum ip address', default='192.168.1.12"')
 parser.add_argument('token', type=str, help='token', default='476e6b70343055483230644c53707a12')
 parser.add_argument('--host', type=str, default='127.0.0.1')
 parser.add_argument('--port', type=int, default=22222)
@@ -91,7 +92,7 @@ def socket_msg_sender(sockets, q):
 
 
 def vacuum_commands_handler(ip, token, q):
-    vac = Vacuum(ip, token, 0)
+    vac = DreameVacuum(ip, token, 0)
     vac.manual_seqnum = 0
 
     while True:
@@ -122,13 +123,24 @@ class VacuumCommand(object):
             }
 
         return {
-            'error': res.error if res.error_code else None,
-            'state_code': res.state_code,
-            'battery': res.battery,
-            'fan_level': res.fanspeed,
-            'clean_seconds': res.data["clean_time"],
-            'clean_area': res.clean_area
-        }
+             'error': res.data["device_fault"], #error if res.error_code else None,
+             'state_code': res.data["device_status"],
+             'charging_state': res.data["charging_state"],
+             'battery': res.data["battery_level"],
+             'fan_level': res.data["cleaning_mode"],
+             'clean_seconds': res.data["cleaning_time"],
+             'clean_area': res.data["cleaning_area"],
+             'main_brush_left_time': res.data["brush_left_time"],
+             'main_brush': res.data["brush_life_level"],
+             'side_brush_left_time': res.data["brush_left_time2"],
+             'side_brush': res.data["brush_life_level2"],
+             'filter_level': res.data["filter_life_level"],
+             'filter_left_time': res.data["filter_left_time"],
+             'operating_mode': res.data["operating_mode"],
+             'volume': res.data["volume"],
+             'water_flow': res.data["water_flow"],
+             'water_box_carriage_status' : res.data["water_box_carriage_status"],
+    }
 
     @classmethod
     def start(cls, vac):
@@ -152,7 +164,7 @@ class VacuumCommand(object):
 
     @classmethod
     def find(cls, vac):
-        return {'code': vac.find()}
+        return {'code': vac.identify()}
 
     @classmethod
     def set_fan_level(cls, vac, level):
@@ -165,7 +177,7 @@ class VacuumCommand(object):
             'main_brush': res.data['main_brush_work_time'],
             'side_brush': res.data['side_brush_work_time'],
             'filter': res.data['filter_work_time'],
-            'sensor': res.data['sensor_dirty_time']
+            'sensor': res.data['sensor_dirty_time'],
         }
 
     @classmethod

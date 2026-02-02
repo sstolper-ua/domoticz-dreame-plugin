@@ -1,11 +1,11 @@
-#       
-#       Xiaomi Mi Robot Vacuum Plugin
+#
+#       Dreame Robot Vacuum Plugin
 #       Author: mrin, 2017
-#       
+#
 """
-<plugin key="xiaomi-mi-robot-vacuum" name="Xiaomi Mi Robot Vacuum" author="mrin" version="0.1.3" wikilink="https://github.com/mrin/domoticz-mirobot-plugin" externallink="">
+<plugin key="Dreame-robot-vacuum" name="Dreame Robot Vacuum" author="ssa" version="0.1.0" wikilink="https://github.com/sstolper-ua/domoticz-dreame-plugin" externallink="">
     <params>
-        <param field="Mode6" label="MIIOServer host:port" width="200px" required="true" default="127.0.0.1:22222"/>
+        <param field="Mode6" label="DreamServer host:port" width="200px" required="true" default="127.0.0.1:22222"/>
         <param field="Mode2" label="Update interval (sec)" width="30px" required="true" default="15"/>
         <param field="Mode5" label="Fan Level Type" width="200px">
             <options>
@@ -37,14 +37,14 @@ import msgpack
 
 class BasePlugin:
     controlOptions = {
-        "LevelActions": "||||||",
-        "LevelNames": "Off|Clean|Home|Spot|Pause|Stop|Find",
+        "LevelActions": "|||||",
+        "LevelNames": "Off|Clean|Home|Spot|Stop|Find",
         "LevelOffHidden": "true",
         "SelectorStyle": "0"
     }
     fanOptions = {
         "LevelActions": "||||",
-        "LevelNames": "Off|Quiet|Balanced|Turbo|Max",
+        "LevelNames": "Off|Silent|Basic|Strong|Full Speed",
         "LevelOffHidden": "true",
         "SelectorStyle": "0"
     }
@@ -71,26 +71,26 @@ class BasePlugin:
     cResetControlUnit = 10
 
     # statuses by protocol
-    # https://github.com/marcelrv/XiaomiRobotVacuumProtocol/blob/master/StatusMessage.md
+    # https://home.miot-spec.com/spec/dreame.vacuum.r2211o
     states = {
         0: 'Unknown 0',
-        1: 'Initiating',
-        2: 'Sleeping',
-        3: 'Waiting',
-        4: 'Unknown 4',
-        5: 'Cleaning',
-        6: 'Back to home',
-        7: 'Manual mode',
-        8: 'Charging',
-        9: 'Charging Error',
-        10: 'Paused',
-        11: 'Spot cleaning',
-        12: 'In Error',
-        13: 'Shutting down',
-        14: 'Updating',
-        15: 'Docking',
-        17: 'Zone cleaning',
-        100: 'Full'
+        1: 'Sweeping',
+        2: 'Idle',
+        3: 'Paused',
+        4: 'Error',
+        5: 'Go Home',
+        6: 'Charging',
+        7: 'Mopping',
+        8: 'Unknown 8',
+        9: 'Unknown 9',
+        10: 'Unknown 10',
+        11: 'Building',
+        12: 'Sweeping and Mopping',
+        13: 'Charging Completed',
+        14: 'Unknown 14',
+        15: 'Unknown 15',
+        17: 'Unknown 17',
+        100: 'Unknown 100'
     }
 
 
@@ -99,7 +99,8 @@ class BasePlugin:
         self.subHost = None
         self.subPort = None
         self.tcpConn = None
-        self.unpacker = msgpack.Unpacker(encoding='utf-8')
+#       self.unpacker = msgpack.Unpacker(encoding='utf-8')
+        self.unpacker = msgpack.Unpacker()
 
     def onStart(self):
         if Parameters['Mode4'] == 'Debug':
@@ -109,7 +110,7 @@ class BasePlugin:
         self.heartBeatCnt = 0
         self.subHost, self.subPort = Parameters['Mode6'].split(':')
 
-        self.tcpConn = Domoticz.Connection(Name='MIIOServer', Transport='TCP/IP', Protocol='None',
+        self.tcpConn = Domoticz.Connection(Name='DreameServer', Transport='TCP/IP', Protocol='None',
                                            Address=self.subHost, Port=self.subPort)
 
         if self.iconName not in Images: Domoticz.Image('icons.zip').Create()
@@ -160,7 +161,7 @@ class BasePlugin:
         pass
 
     def onConnect(self, Connection, Status, Description):
-        Domoticz.Debug("MIIOServer connection status is [%s] [%s]" % (Status, Description))
+        Domoticz.Debug("DreameServer connection status is [%s] [%s]" % (Status, Description))
 
     def onMessage(self, Connection, Data):
         try:
@@ -174,7 +175,7 @@ class BasePlugin:
                 if result['cmd'] == 'status':
 
                     UpdateDevice(self.statusUnit,
-                                 (1 if result['state_code'] in [5, 6, 11, 17] else 0), # ON is Cleaning, Back to home, Spot cleaning
+                                 (1 if result['state_code'] in [1, 5, 6, 7, 11, 12] else 0), # ON is Cleaning, Back to home, Spot cleaning
                                  self.states.get(result['state_code'], 'Undefined')
                                  )
 
@@ -184,20 +185,27 @@ class BasePlugin:
                     if Parameters['Mode5'] == 'dimmer':
                         UpdateDevice(self.fanDimmerUnit, 2, str(result['fan_level'])) # nValue=2 for show percentage, instead ON/OFF state
                     else:
-                        level = {38: 10, 60: 20, 77: 30, 90: 40}.get(result['fan_level'], None)
+                        level = {0: 10, 1: 20, 2: 30, 3: 40}.get(result['fan_level'], None)
                         if level: UpdateDevice(self.fanSelectorUnit, 1, str(level))
 
-                elif result['cmd'] == 'consumable_status':
+#                elif result['cmd'] == 'consumable_status':
+#                    mainBrush = cPercent(result['main_brush'], 300)
+#                    sideBrush = cPercent(result['side_brush'], 200)
+#                    filter = cPercent(result['filter'], 150)
+#                    sensors = cPercent(result['sensor'], 30)
 
-                    mainBrush = cPercent(result['main_brush'], 300)
-                    sideBrush = cPercent(result['side_brush'], 200)
-                    filter = cPercent(result['filter'], 150)
-                    sensors = cPercent(result['sensor'], 30)
-
-                    UpdateDevice(self.cMainBrushUnit, mainBrush, str(mainBrush), AlwaysUpdate=True)
-                    UpdateDevice(self.cSideBrushUnit, sideBrush, str(sideBrush), AlwaysUpdate=True)
-                    UpdateDevice(self.cFilterUnit, filter, str(filter), AlwaysUpdate=True)
-                    UpdateDevice(self.cSensorsUnit, sensors, str(sensors), AlwaysUpdate=True)
+                    if 'main_brush' in result:
+                       mainBrush = result['main_brush']
+                       UpdateDevice(self.cMainBrushUnit, mainBrush, str(mainBrush), AlwaysUpdate=True)
+                    if 'side_brush' in result:
+                       sideBrush = result['side_brush']
+                       UpdateDevice(self.cSideBrushUnit, sideBrush, str(sideBrush), AlwaysUpdate=True)
+                    if 'filter_level' in result:
+                       filter = result['filter_level']
+                       UpdateDevice(self.cFilterUnit, filter, str(filter), AlwaysUpdate=True)
+                    if 'sensor' in result:
+                       sensors = result['sensor']
+                       UpdateDevice(self.cSensorsUnit, sensors, str(sensors), AlwaysUpdate=True)
 
         except msgpack.UnpackException as e:
             Domoticz.Error('Unpacker exception [%s]' % str(e))
@@ -236,18 +244,18 @@ class BasePlugin:
                 if self.apiRequest('spot') and self.isOFF and sDevice.sValue != self.states[8]: # Spot cleaning will not start if Charging
                     UpdateDevice(self.statusUnit, 1, self.states[11])  # Spot cleaning
 
-            elif Level == 40: # Pause
-                if self.apiRequest('pause') and self.isON:
-                    if sDevice.sValue == self.states[11]: # For Spot cleaning - Pause treats as Stop
-                        UpdateDevice(self.statusUnit, 0, self.states[3])  # Waiting
-                    else:
-                        UpdateDevice(self.statusUnit, 0, self.states[10])  # Paused
+#            elif Level == 40: # Pause
+#                if self.apiRequest('pause') and self.isON:
+#                    if sDevice.sValue == self.states[11]: # For Spot cleaning - Pause treats as Stop
+#                        UpdateDevice(self.statusUnit, 0, self.states[3])  # Waiting
+#                    else:
+#                        UpdateDevice(self.statusUnit, 0, self.states[10])  # Paused
 
-            elif Level == 50: # Stop
+            elif Level == 40: # Stop
                 if self.apiRequest('stop') and self.isON and sDevice.sValue not in [self.states[11], self.states[6]]: # Stop doesn't work for Spot cleaning, Back to home
                     UpdateDevice(self.statusUnit, 0, self.states[3]) # Waiting
 
-            elif Level == 60: # Find
+            elif Level == 50: # Find
                 self.apiRequest('find')
 
         elif self.fanDimmerUnit == Unit and Parameters['Mode5'] == 'dimmer':
@@ -255,9 +263,21 @@ class BasePlugin:
             if self.apiRequest('set_fan_level', Level): UpdateDevice(self.fanDimmerUnit, 2, str(Level))
 
         elif self.fanSelectorUnit == Unit and Parameters['Mode5'] == 'selector':
-            num_level = {10: 38, 20: 60, 30: 77, 40: 90}.get(Level, None)
-            if num_level and self.apiRequest('set_fan_level', num_level): UpdateDevice(self.fanSelectorUnit, 1, str(Level))
 
+            if Level == 10: #Silent
+                if self.apiRequest('set_fan_level', '0'):
+                    UpdateDevice(self.fanSelectorUnit, 1, str(10))
+            elif Level == 20: #Basic
+                if self.apiRequest('set_fan_level', '1'):
+                    UpdateDevice(self.fanSelectorUnit, 1, str(20))
+            elif Level == 30: #Strong
+                if self.apiRequest('set_fan_level', '2'):
+                    UpdateDevice(self.fanSelectorUnit, 1, str(30))
+            elif Level == 40: #Full Speed
+                if self.apiRequest('set_fan_level', '3'):
+                    UpdateDevice(self.fanSelectorUnit, 1, str(40))
+#            num_level = {0: -1, 10: 0, 20: 1, 30: 2, 40: 3}.get(Level, None)
+#            if num_level and self.apiRequest('set_fan_level', num_level): UpdateDevice(self.fanSelectorUnit, 1, str(Level))
         elif self.cResetControlUnit == Unit:
 
             if Level == 10: # Reset Main Brush
@@ -283,7 +303,7 @@ class BasePlugin:
         Domoticz.Debug("Notification: " + Name + "," + Subject + "," + Text + "," + Status + "," + str(Priority) + "," + Sound + "," + ImageFile)
 
     def onDisconnect(self, Connection):
-        Domoticz.Debug("MIIOServer disconnected")
+        Domoticz.Debug("Dreame Server disconnected")
 
     def onHeartbeat(self):
         if not self.tcpConn.Connecting() and not self.tcpConn.Connected():
