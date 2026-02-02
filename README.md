@@ -47,8 +47,8 @@ Also need to install virtualenv:
 Then go to plugins folder and clone repository:
 ```
 cd domoticz/plugins
-git clone https://github.com/mrin/domoticz-dreame-plugin.git dreame-mirobot
-cd dreane-mirobot
+git clone https://github.com/sstolper-ua/domoticz-dreame-plugin.git dreame-robot
+cd dreane-robot
 virtualenv -p python3 .env
 source .env/bin/activate
 
@@ -68,7 +68,7 @@ nano dreame_server.sh
 
 # file dreame_server.sh
 DAEMON_USER=root
-DAEMON=/home/pi/domoticz/plugins/dreane-mirobot/dreame_server.py
+DAEMON=/home/pi/domoticz/plugins/dreame-robot/dreame_server.py
 DAEMON_ARGS="192.168.1.12 476e6b70343055483230644c53707a12"
 DAEMON_ARGS="$DAEMON_ARGS --host 127.0.0.1 --port 22222"
 #
@@ -86,7 +86,7 @@ sudo chmod +x dreame_server.py
 sudo chmod +x dreame_server.sh
 
 # check your path here:
-sudo ln -s /home/pi/domoticz/plugins/dreame-mirobot/dreame_server.sh /etc/init.d/dreame_server
+sudo ln -s /home/pi/domoticz/plugins/dreame-robot/dreame_server.sh /etc/init.d/dreame_server
 
 # add to startup
 sudo update-rc.d dreame_server defaults
@@ -136,7 +136,7 @@ If you want to change ```Fan Level Type``` just disable hardware, update type an
 ## How to update plugin
 
 ```
-cd domoticz/plugins/dreame-mirobot
+cd domoticz/plugins/dreame-robot
 git pull
 ```
 
