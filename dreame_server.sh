@@ -1,22 +1,22 @@
 #! /bin/sh
 ### BEGIN INIT INFO
 # Author: mrin
-# Provides:          miio_server
+# Provides:          dreame_server
 # Required-Start:
 # Required-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: MIIO Server
-# Description:       This daemon will start MIIO Server
+# Short-Description: Dreame Server
+# Description:       This daemon will start Dreame Server
 ### END INIT INFO
 
-NAME="MIIO Server"
+NAME="Dreame Server"
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
-SCRIPTNAME=/etc/init.d/miio_server
-PIDFILE=/var/run/miio_server.pid
+SCRIPTNAME=/etc/init.d/dreame_server
+PIDFILE=/var/run/dreame_server.pid
 
 DAEMON_USER=root
-DAEMON=/home/pi/domoticz/plugins/xiaomi-mirobot/miio_server.py
+DAEMON=/home/pi/domoticz/plugins/dreame-robot/dreame_server.py
 DAEMON_ARGS="192.168.1.12 476e6b70343055483230644c53707a12"
 DAEMON_ARGS="$DAEMON_ARGS --host 127.0.0.1 --port 22222"
 
