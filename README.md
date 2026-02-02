@@ -16,7 +16,7 @@ Plugin provides: Status, Control, Fan Level, Battery, Care status devices
 
 **Control**: for sending commands.
 
-**Fan Level**: for adjusting suction power. (MiHome app related: Quiet=38, Balanced=60, Turbo=77, Max=90)
+**Fan Level**: for adjusting suction power. (MiHome app related: Silent, Balanced, Strong, Full Speed)
 
 **Battery**: since ```0.0.4``` as new device
 

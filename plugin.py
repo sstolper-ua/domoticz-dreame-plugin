@@ -49,8 +49,8 @@ class BasePlugin:
         "SelectorStyle": "0"
     }
     careOptions = {
-        "LevelActions": "||||",
-        "LevelNames": "Off|Main Brush|Side Brush|Filter|Sensor",
+        "LevelActions": "|||",
+        "LevelNames": "Off|Main Brush|Side Brush|Filter",
         "LevelOffHidden": "true",
         "SelectorStyle": "0"
     }
@@ -142,9 +142,6 @@ class BasePlugin:
             Domoticz.Device(Name='Care Side Brush', Unit=self.cSideBrushUnit, TypeName='Custom', Image=iconID,
                             Options=self.customSensorOptions).Create()
 
-        if self.cSensorsUnit not in Devices:
-            Domoticz.Device(Name='Care Sensors ', Unit=self.cSensorsUnit, TypeName='Custom', Image=iconID,
-                            Options=self.customSensorOptions).Create()
 
         if self.cFilterUnit not in Devices:
             Domoticz.Device(Name='Care Filter', Unit=self.cFilterUnit, TypeName='Custom', Image=iconID,
@@ -188,12 +185,6 @@ class BasePlugin:
                         level = {0: 10, 1: 20, 2: 30, 3: 40}.get(result['fan_level'], None)
                         if level: UpdateDevice(self.fanSelectorUnit, 1, str(level))
 
-#                elif result['cmd'] == 'consumable_status':
-#                    mainBrush = cPercent(result['main_brush'], 300)
-#                    sideBrush = cPercent(result['side_brush'], 200)
-#                    filter = cPercent(result['filter'], 150)
-#                    sensors = cPercent(result['sensor'], 30)
-
                     if 'main_brush' in result:
                        mainBrush = result['main_brush']
                        UpdateDevice(self.cMainBrushUnit, mainBrush, str(mainBrush), AlwaysUpdate=True)
@@ -203,9 +194,6 @@ class BasePlugin:
                     if 'filter_level' in result:
                        filter = result['filter_level']
                        UpdateDevice(self.cFilterUnit, filter, str(filter), AlwaysUpdate=True)
-                    if 'sensor' in result:
-                       sensors = result['sensor']
-                       UpdateDevice(self.cSensorsUnit, sensors, str(sensors), AlwaysUpdate=True)
 
         except msgpack.UnpackException as e:
             Domoticz.Error('Unpacker exception [%s]' % str(e))
@@ -276,8 +264,7 @@ class BasePlugin:
             elif Level == 40: #Full Speed
                 if self.apiRequest('set_fan_level', '3'):
                     UpdateDevice(self.fanSelectorUnit, 1, str(40))
-#            num_level = {0: -1, 10: 0, 20: 1, 30: 2, 40: 3}.get(Level, None)
-#            if num_level and self.apiRequest('set_fan_level', num_level): UpdateDevice(self.fanSelectorUnit, 1, str(Level))
+
         elif self.cResetControlUnit == Unit:
 
             if Level == 10: # Reset Main Brush
@@ -292,11 +279,8 @@ class BasePlugin:
                 if self.apiRequest('care_reset_filter'):
                     UpdateDevice(self.cFilterUnit, 100, '100')
 
-            elif Level == 40: # Reset Sensors
-                if self.apiRequest('care_reset_sensor'):
-                    UpdateDevice(self.cSensorsUnit, 100, '100')
 
-            self.apiRequest('consumable_status')
+            self.apiRequest('status')
 
 
     def onNotification(self, Name, Subject, Text, Status, Priority, Sound, ImageFile):

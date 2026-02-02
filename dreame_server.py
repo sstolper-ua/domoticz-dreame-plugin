@@ -180,17 +180,18 @@ class VacuumCommand(object):
             'sensor': res.data['sensor_dirty_time'],
         }
 
+
     @classmethod
     def care_reset_main_brush(cls, vac):
-        return {'code': vac.send('reset_consumable', ['main_brush_work_time'])}
+        return {'code': vac.reset_mainbrush_life()}
 
     @classmethod
     def care_reset_side_brush(cls, vac):
-        return {'code': vac.send('reset_consumable', ['side_brush_work_time'])}
+        return {'code': vac.reset_sidebrush_life()}
 
     @classmethod
     def care_reset_filter(cls, vac):
-        return {'code': vac.send('reset_consumable', ['filter_work_time'])}
+        return {'code': vac.reset_filter_life()}
 
     @classmethod
     def care_reset_sensor(cls, vac):
