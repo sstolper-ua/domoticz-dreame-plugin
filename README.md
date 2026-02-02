@@ -2,7 +2,7 @@
 # Dream Robot Vacuum - Domoticz Python plugin
 
 *This plugin uses the [Python-miio](https://github.com/rytilahti/python-miio) library.*
-*This plugin is fork of the [mrin/domoticz-mirobot-plugin](https://github.com/mrin/domoticz-mirobot-plugin) linrary
+*This plugin is fork of the [mrin/domoticz-mirobot-plugin](https://github.com/mrin/domoticz-robot-plugin) linrary*
 
 *See this [link](https://www.domoticz.com/wiki/Using_Python_plugins) for more information on the Domoticz plugins.*
 
@@ -57,15 +57,15 @@ pip3 install -r pip_req.txt
 ```
 
 Since ```0.1.2``` need some prepare of **MIIO Server** to run as service:
-1. Open and edit miio_server.sh by vi/nano:
+1. Open and edit dreame_server.sh by vi/nano:
 ```
-nano miio_server.sh
+nano dreame_server.sh
 
 # 1. Check and update absolute path to dreame_server.py
 # 2. Update IP and TOKEN for robot
 # 3. Optional. Change MIIO server host-port bindings if need it
 
-# file miio_server.sh
+# file dreame_server.sh
 DAEMON_USER=root
 DAEMON=/home/pi/domoticz/plugins/dreane-mirobot/dreame_server.py
 DAEMON_ARGS="192.168.1.12 476e6b70343055483230644c53707a12"
@@ -74,7 +74,7 @@ DAEMON_ARGS="$DAEMON_ARGS --host 127.0.0.1 --port 22222"
 ```
 
 2. Check path to python3 ```which python3```. By default is ```/usr/bin/python3```. 
-If your path different than default, update miio_server.py first line with your path.
+If your path different than default, update dreame_server.py first line with your path.
 ```
 #!/usr/bin/python3
 ```
