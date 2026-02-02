@@ -1,7 +1,7 @@
 
 # Dream Robot Vacuum - Domoticz Python plugin
 
-*This plugin uses the [Python-miio](https://github.com/rytilahti/python-miio) library.*
+*This plugin uses the [Python-miio](https://github.com/rytilahti/python-miio) library.* and works with 0.6.0 which is pre-release
 
 *This plugin is fork of the [mrin/domoticz-mirobot-plugin](https://github.com/mrin/domoticz-robot-plugin) linrary*
 
@@ -54,7 +54,7 @@ source .env/bin/activate
 
 # and then:
 pip3 install -r pip_req.txt 
-# or pip3 install gevent msgpack-python python-miio==0.6.0
+# or pip3 install gevent msgpack-python git+https://github.com/rytilahti/python-miio.git
 ```
 
 Since ```0.1.2``` need some prepare of **MIIO Server** to run as service:
